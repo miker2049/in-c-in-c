@@ -64,10 +64,10 @@ smf_new(void)
 
 	memset(smf, 0, sizeof(smf_t));
 
-	smf->tracks_array = g_ptr_array_new();
+	smf->tracks_array = NULL;
 	assert(smf->tracks_array);
 
-	smf->tempo_array = g_ptr_array_new();
+	smf->tempo_array = NULL;
 	assert(smf->tempo_array);
 
 	cantfail = smf_set_ppqn(smf, 120);
@@ -88,15 +88,15 @@ void
 smf_delete(smf_t *smf)
 {
 	/* Remove all the tracks, from last to first. */
-	while (smf->tracks_array->len > 0)
-		smf_track_delete(g_ptr_array_index(smf->tracks_array, smf->tracks_array->len - 1));
+	while (cvector_size(smf->tracks_array) > 0)
+		smf_track_delete(smf->tracks_array[ cvector_size(smf->tracks_array) - 1]);
 
 	smf_fini_tempo(smf);
 
-	assert(smf->tracks_array->len == 0);
+	assert(cvector_size(smf->tracks_array) == 0);
 	assert(smf->number_of_tracks == 0);
-	g_ptr_array_free(smf->tracks_array, TRUE);
-	g_ptr_array_free(smf->tempo_array, TRUE);
+	cvector_free(smf->tracks_array);
+	cvector_free(smf->tempo_array);
 
 	memset(smf, 0, sizeof(smf_t));
 	free(smf);
@@ -118,7 +118,7 @@ smf_track_new(void)
 	memset(track, 0, sizeof(smf_track_t));
 	track->next_event_number = -1;
 
-	track->events_array = g_ptr_array_new();
+	track->events_array = NULL;
 	assert(track->events_array);
 
 	return (track);
@@ -134,15 +134,16 @@ smf_track_delete(smf_track_t *track)
 	assert(track->events_array);
 
 	/* Remove all the events, from last to first. */
-	while (track->events_array->len > 0)
-		smf_event_delete(g_ptr_array_index(track->events_array, track->events_array->len - 1));
+	/* while (cvector_size(track->events_array) > 0) */
+	/* 	smf_event_delete((smf_event_t*) track->events_array[ cvector_size(track->events_array) - 1]); */
 
-	if (track->smf)
-		smf_track_remove_from_smf(track);
+	/* if (track->smf) */
+	/* 	smf_track_remove_from_smf(track); */
+	cvector_free(track);
 
-	assert(track->events_array->len == 0);
+	assert(cvector_size(track->events_array) == 0);
 	assert(track->number_of_events == 0);
-	g_ptr_array_free(track->events_array, TRUE);
+	cvector_free(track->events_array);
 
 	memset(track, 0, sizeof(smf_track_t));
 	free(track);
@@ -160,7 +161,7 @@ smf_add_track(smf_t *smf, smf_track_t *track)
 	assert(track->smf == NULL);
 
 	track->smf = smf;
-	g_ptr_array_add(smf->tracks_array, track);
+	cvector_push_back(smf->tracks_array, track);
 
 	smf->number_of_tracks++;
 	track->track_number = smf->number_of_tracks;
@@ -174,38 +175,38 @@ smf_add_track(smf_t *smf, smf_track_t *track)
 /**
  * Detaches track from the smf.
  */
-void
-smf_track_remove_from_smf(smf_track_t *track)
-{
-	int i, j;
-	smf_track_t *tmp;
-	smf_event_t *ev;
+/* void */
+/* smf_track_remove_from_smf(smf_track_t *track) */
+/* { */
+/* 	int i, j; */
+/* 	smf_track_t *tmp; */
+/* 	smf_event_t *ev; */
 
-	assert(track->smf != NULL);
+/* 	assert(track->smf != NULL); */
 
-	track->smf->number_of_tracks--;
+/* 	track->smf->number_of_tracks--; */
 
-	assert(track->smf->tracks_array);
-	g_ptr_array_remove(track->smf->tracks_array, track);
+/* 	assert(track->smf->tracks_array); */
+/* 	g_ptr_array_remove(track->smf->tracks_array, track); */
 
-	/* Renumber the rest of the tracks, so they are consecutively numbered. */
-	for (i = track->track_number; i <= track->smf->number_of_tracks; i++) {
-		tmp = smf_get_track_by_number(track->smf, i);
-		tmp->track_number = i;
+/* 	/\* Renumber the rest of the tracks, so they are consecutively numbered. *\/ */
+/* 	for (i = track->track_number; i <= track->smf->number_of_tracks; i++) { */
+/* 		tmp = smf_get_track_by_number(track->smf, i); */
+/* 		tmp->track_number = i; */
 
-		/*
-		 * Events have track numbers too.  I guess this wasn't a wise
-		 * decision.  ;-/
-		 */
-		for (j = 1; j <= tmp->number_of_events; j++) {
-			ev = smf_track_get_event_by_number(tmp, j);
-			ev->track_number = i;
-		}
-	}
+/* 		/\* */
+/* 		 * Events have track numbers too.  I guess this wasn't a wise */
+/* 		 * decision.  ;-/ */
+/* 		 *\/ */
+/* 		for (j = 1; j <= tmp->number_of_events; j++) { */
+/* 			ev = smf_track_get_event_by_number(tmp, j); */
+/* 			ev->track_number = i; */
+/* 		} */
+/* 	} */
 
-	track->track_number = -1;
-	track->smf = NULL;
-}
+/* 	track->track_number = -1; */
+/* 	track->smf = NULL; */
+/* } */
 
 /**
  * Allocates new smf_event_t structure.  The caller is responsible for allocating
@@ -377,15 +378,15 @@ smf_event_delete(smf_event_t *event)
 /**
  * Used for sorting track->events_array.
  */
-static gint
-events_array_compare_function(gconstpointer aa, gconstpointer bb)
+static int
+events_array_compare_function(void* aa, void* bb)
 {
 	smf_event_t *a, *b;
 	
 	/* "The comparison function for g_ptr_array_sort() doesn't take the pointers
 	    from the array as arguments, it takes pointers to the pointers in the array." */
-	a = (smf_event_t *)*(gpointer *)aa;
-	b = (smf_event_t *)*(gpointer *)bb;
+	a = (smf_event_t *)aa;
+	b = (smf_event_t *)bb;
 
 	if (a->time_pulses < b->time_pulses)
 		return (-1);
@@ -467,13 +468,13 @@ smf_track_add_event(smf_track_t *track, smf_event_t *event)
 	if (last_pulses <= event->time_pulses) {
 		event->delta_time_pulses = event->time_pulses - last_pulses;
 		assert(event->delta_time_pulses >= 0);
-		g_ptr_array_add(track->events_array, event);
+		cvector_push_back(track->events_array, event);
 		event->event_number = track->number_of_events;
 
 	/* We need to insert in the middle of the track.  XXX: This is slow. */
 	} else {
 		/* Append, then sort according to ->time_pulses. */
-		g_ptr_array_add(track->events_array, event);
+		cvector_push_back(track->events_array, event);
 		g_ptr_array_sort(track->events_array, events_array_compare_function);
 
 		/* Renumber entries and fix their ->delta_pulses. */
@@ -735,7 +736,7 @@ smf_peek_next_event_from_track(smf_track_t *track)
 		return (NULL);
 
 	assert(track->next_event_number >= 1);
-	assert(track->events_array->len != 0);
+	assert(cvector_size(track->events_array) != 0);
 
 	event = smf_track_get_event_by_number(track, track->next_event_number);
 
@@ -756,7 +757,7 @@ smf_get_track_by_number(const smf_t *smf, int track_number)
 	if (track_number > smf->number_of_tracks)
 		return (NULL);
 
-	track = (smf_track_t *)g_ptr_array_index(smf->tracks_array, track_number - 1);
+	track = (smf_track_t *)smf->tracks_array[ track_number - 1];
 
 	assert(track);
 
@@ -777,7 +778,7 @@ smf_track_get_event_by_number(const smf_track_t *track, int event_number)
 	if (event_number > track->number_of_events)
 		return (NULL);
 
-	event = g_ptr_array_index(track->events_array, event_number - 1);
+	event = track->events_array[ event_number - 1];
 
 	assert(event);
 

@@ -51,7 +51,7 @@ new_tempo(smf_t *smf, int pulses)
 {
 	smf_tempo_t *tempo, *previous_tempo = NULL;
 
-	if (smf->tempo_array->len > 0) {
+	if (cvector_size(smf->tempo_array) > 0) {
 		previous_tempo = smf_get_last_tempo(smf);
 
 		/* If previous tempo starts at the same time as new one, reuse it, updating in place. */
@@ -81,7 +81,7 @@ new_tempo(smf_t *smf, int pulses)
 		tempo->notes_per_note = -1;
 	}
 
-	g_ptr_array_add(smf->tempo_array, tempo);
+	cvector_push_back(smf->tempo_array, tempo);
 
 	if (pulses == 0)
 		tempo->time_seconds = 0.0;
@@ -178,7 +178,7 @@ remove_last_tempo_with_pulses(smf_t *smf, int pulses)
 	   events, A and B, that occur at the same time.  We remove B, then try to remove
 	   A.  However, both tempo changes got coalesced in new_tempo(), so it is impossible
 	   to remove B. */
-	if (smf->tempo_array->len == 0)
+	if (cvector_size(smf->tempo_array) == 0)
 		return;
 
 	tempo = smf_get_last_tempo(smf);
@@ -190,7 +190,7 @@ remove_last_tempo_with_pulses(smf_t *smf, int pulses)
 	memset(tempo, 0, sizeof(smf_tempo_t));
 	free(tempo);
 
-	g_ptr_array_remove_index(smf->tempo_array, smf->tempo_array->len - 1);
+	cvector_(smf->tempo_array, smf->tempo_array->len - 1);
 }
 
 static double
@@ -343,17 +343,17 @@ smf_fini_tempo(smf_t *smf)
 {
 	smf_tempo_t *tempo;
 
-	while (smf->tempo_array->len > 0) {
-		tempo = g_ptr_array_index(smf->tempo_array, smf->tempo_array->len - 1);
+	while (cvector_size(smf->tempo_array) > 0) {
+		tempo = smf->tempo_array[ cvector_size(smf->tempo_array) - 1];
 		assert(tempo);
 
 		memset(tempo, 0, sizeof(smf_tempo_t));
 		free(tempo);
 
-		g_ptr_array_remove_index(smf->tempo_array, smf->tempo_array->len - 1);
+		cvector_erase(smf->tempo_array, cvector_size(smf->tempo_array) - 1);
 	}
 
-	assert(smf->tempo_array->len == 0);
+	assert(cvector_size(smf->tempo_array) == 0);
 }
 
 /**

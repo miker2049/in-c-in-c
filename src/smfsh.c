@@ -31,7 +31,7 @@
  * "SMF shell", command line utility.
  */
 
-#include <stdio.h>
+/* #include <stdio.h> */
 #include <stdlib.h>
 #include <unistd.h>
 #ifdef __MINGW32__
@@ -44,7 +44,7 @@
 #include <ctype.h>
 #include <assert.h>
 #include "smf.h"
-#include "config.h"
+/* #include "config.h" */
 
 #ifdef HAVE_LIBREADLINE
 #include <readline/readline.h>
@@ -59,7 +59,7 @@ char *last_file_name = NULL;
 #define COMMAND_LENGTH 10
 
 static void
-log_handler(const gchar *log_domain, GLogLevelFlags log_level, const gchar *message, gpointer notused)
+log_handler(const char *log_domain, int log_level, const char *message, void* notused)
 {
 	(void) notused;
 	if (strcmp(log_domain, "smfsh") == 0)

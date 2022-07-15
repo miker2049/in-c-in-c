@@ -218,7 +218,14 @@ extern "C" {
 #endif
 
 #include <stdio.h>
-#include <glib.h>
+/* #include <glib.h> */
+#include "cvector.h"
+
+#define g_critical(...) printf(__VA_ARGS__)
+#define g_message(...) printf(__VA_ARGS__)
+#define g_warning(...) printf(__VA_ARGS__)
+#define g_debug(...) printf(__VA_ARGS__)
+#define g_error(...) printf(__VA_ARGS__)
 
 #if defined(__GNUC__) && __GNUC__ >= 4
 #define WARN_UNUSED_RESULT __attribute__ ((warn_unused_result))
@@ -227,6 +234,7 @@ extern "C" {
 #endif
 
 /** Represents a "song", that is, collection of one or more tracks. */
+struct smf_track_struct;
 struct smf_struct {
 	int		format;
 
@@ -244,12 +252,12 @@ struct smf_struct {
 	int		expected_number_of_tracks;
 
 	/** Private, used by smf.c. */
-	GPtrArray	*tracks_array;
+	cvector_vector_type(void*)	tracks_array;
 	double		last_seek_position;
 
 	/** Private, used by smf_tempo.c. */
 	/** Array of pointers to smf_tempo_struct. */
-	GPtrArray	*tempo_array;
+	cvector_vector_type(void*)	tempo_array;
 };
 
 typedef struct smf_struct smf_t;
@@ -286,7 +294,7 @@ struct smf_track_struct {
 
 	/** Absolute time of next event on events_queue. */
 	int		time_of_next_event;
-	GPtrArray	*events_array;
+	cvector_vector_type(void*)	events_array;
 
 	/** API consumer is free to use this for whatever purpose.  NULL in freshly allocated track.
 	    Note that tracks might be deallocated not only explicitly, by calling smf_track_delete(),
