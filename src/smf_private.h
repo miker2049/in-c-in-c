@@ -31,7 +31,6 @@
 #include <stdint.h>
 #include <sys/types.h>
 
-#include "config.h"
 
 #define SMF_VERSION PACKAGE_VERSION
 
