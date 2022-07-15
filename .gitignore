@@ -18,3 +18,8 @@ ltmain.sh
 missing
 smfsh
 stamp-h1
+.ccls-cache
+.cfrags
+compile_commands.json
+zig-cache
+zig-out
