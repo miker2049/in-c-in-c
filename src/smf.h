@@ -218,7 +218,8 @@ extern "C" {
 #endif
 
 #include <stdio.h>
-#include <glib.h>
+#include "geelib.h"
+/* #include <glib.h> */
 
 #if defined(__GNUC__) && __GNUC__ >= 4
 #define WARN_UNUSED_RESULT __attribute__ ((warn_unused_result))
