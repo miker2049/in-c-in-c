@@ -19,10 +19,11 @@ pub fn build(b: *std.build.Builder) !void {
             "src/smf_load.c",
             "src/smf_save.c",
             "src/smf_tempo.c",
+            "src/geelib.c",
             "src/smfsh.c"
             }, &.{
             "-DPACKAGE_VERSION=\"0.0.1\"",
-            "-gen-cdb-fragment-path", ".cfrags"
+            "-gen-cdb-fragment-path", ".cfrags", "-g"
         });
     }
 

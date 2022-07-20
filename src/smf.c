@@ -46,6 +46,7 @@
 #endif /* ! __MINGW32__ */
 #include "smf.h"
 #include "smf_private.h"
+#include "geelib.h"
 
 /**
  * Allocates new smf_t structure.
