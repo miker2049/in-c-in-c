@@ -1,3 +1,8 @@
+# _IN C_ In C
+
+This repository contains all the relevant source code to compile a program that can produce midifiles of 
+
+# Original Readme
 This is the continuation of libsmf, a BSD-licensed C library for reading
 and writing Standard MIDI Files (*.mid). It transparently handles
 conversions between time and pulses, tempo maps, and more. Full API
