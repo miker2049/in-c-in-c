@@ -8,6 +8,7 @@ typedef const gpointer gconstpointer;
 typedef int guint;
 typedef int gint;
 
+typedef unsigned int uint;
 typedef struct _GPtrArray GPtrArray;
 struct _GPtrArray {
   gpointer *pdata;

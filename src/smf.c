@@ -379,7 +379,7 @@ smf_event_delete(smf_event_t *event)
  * Used for sorting track->events_array.
  */
 static gint
-events_array_compare_function(gconstpointer aa, gconstpointer bb)
+events_array_compare_function(const void* aa, const void* bb)
 {
 	smf_event_t *a, *b;
 	
@@ -475,7 +475,8 @@ smf_track_add_event(smf_track_t *track, smf_event_t *event)
 	} else {
 		/* Append, then sort according to ->time_pulses. */
 		g_ptr_array_add(track->events_array, event);
-		g_ptr_array_sort(track->events_array, events_array_compare_function);
+		/* g_ptr_array_sort(track->events_array, events_array_compare_function); */
+		qsort(track->events_array->pdata, track->events_array->len, sizeof(gpointer), events_array_compare_function);
 
 		/* Renumber entries and fix their ->delta_pulses. */
 		for (i = 1; i <= track->number_of_events; i++) {
