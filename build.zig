@@ -13,6 +13,7 @@ pub fn build(b: *std.build.Builder) !void {
         smf.setTarget(target);
         smf.setBuildMode(mode);
         smf.linkLibC();
+        smf.install();
         smf.addIncludeDir("src");
         smf.addCSourceFiles(&.{
             "src/smf.c",
@@ -51,15 +52,16 @@ pub fn build(b: *std.build.Builder) !void {
             }, flags);
     }
 
-    const rmcdb = b.addSystemCommand(&.{
-        "./clearcfrags.sh"
-    });
+    // const rmcdb = b.addSystemCommand(&.{
+    //     "./clearcfrags.sh"
+    // });
     const cdbgen = b.addSystemCommand(&.{
         "./gencdb.sh"
     });
-    smf.step.dependOn(&rmcdb.step);
+    // smf.step.dependOn(&rmcdb.step);
 
     smfsh.step.dependOn(&smf.step);
+    main.step.dependOn(&smf.step);
 
     cdbgen.step.dependOn(&smfsh.step);
     cdbgen.step.dependOn(&main.step);

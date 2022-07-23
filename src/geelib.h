@@ -1,6 +1,6 @@
 #ifndef GEELIB_H_
 #define GEELIB_H_
-#import "cvector.h"
+#include "cvector.h"
 
 typedef char gchar;
 typedef void *gpointer;

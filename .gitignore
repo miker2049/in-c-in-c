@@ -4,8 +4,6 @@
 *.pc
 .deps
 .libs
-Makefile
-Makefile.in
 aclocal.m4
 api
 autom4te.cache
